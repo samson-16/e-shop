@@ -1,0 +1,49 @@
+import { Product } from "@/types/product";
+import ProductCard from "./ProductCard";
+
+interface ProductGridProps {
+  products: Product[];
+  onToggleFavorite: (product: Product) => void;
+  isFavorite: (productId: number) => boolean;
+  onDelete: (productId: number) => void;
+  lastProductRef?: (node: HTMLDivElement) => void;
+}
+
+export default function ProductGrid({
+  products,
+  onToggleFavorite,
+  isFavorite,
+  onDelete,
+  lastProductRef,
+}: ProductGridProps) {
+  return (
+    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {products.map((product, index) => {
+        const isLastProduct = lastProductRef && products.length === index + 1;
+
+        if (isLastProduct) {
+          return (
+            <div ref={lastProductRef} key={product.id}>
+              <ProductCard
+                product={product}
+                onToggleFavorite={() => onToggleFavorite(product)}
+                isFavorite={isFavorite(product.id)}
+                onDelete={onDelete}
+              />
+            </div>
+          );
+        }
+
+        return (
+          <ProductCard
+            key={product.id}
+            product={product}
+            onToggleFavorite={() => onToggleFavorite(product)}
+            isFavorite={isFavorite(product.id)}
+            onDelete={onDelete}
+          />
+        );
+      })}
+    </div>
+  );
+}
