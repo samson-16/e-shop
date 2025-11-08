@@ -1,3 +1,6 @@
+"use client";
+
+import { motion } from "framer-motion";
 import { Product } from "@/types/product";
 import ProductCard from "./ProductCard";
 
@@ -8,6 +11,16 @@ interface ProductGridProps {
   onDelete: (productId: number) => void;
   lastProductRef?: (node: HTMLDivElement) => void;
 }
+
+const container = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
 
 export default function ProductGrid({
   products,

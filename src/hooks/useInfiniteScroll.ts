@@ -16,15 +16,27 @@ export function useInfiniteScroll({
   const lastElementRef = useCallback(
     (node: HTMLDivElement) => {
       if (isLoading) return;
-      if (observer.current) observer.current.disconnect();
 
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          onLoadMore();
+      if (observer.current) {
+        observer.current.disconnect();
+      }
+
+      observer.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && hasMore) {
+            onLoadMore();
+          }
+        },
+        {
+          root: null,
+          rootMargin: "100px",
+          threshold: 0.1,
         }
-      });
+      );
 
-      if (node) observer.current.observe(node);
+      if (node) {
+        observer.current.observe(node);
+      }
     },
     [isLoading, hasMore, onLoadMore]
   );

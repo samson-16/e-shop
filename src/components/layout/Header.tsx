@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { motion } from "framer-motion";
 import { Moon, Sun, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
@@ -33,52 +34,79 @@ export default function Header() {
   };
 
   return (
-    <header className="border-b">
+    <motion.header
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
+      className="border-b backdrop-blur-sm bg-background/95 sticky top-0 z-50"
+    >
       <nav className="container mx-auto p-4 flex justify-between items-center">
         <Link href="/" className="text-xl font-bold">
-          E-Shop
+          <motion.span
+            whileHover={{ scale: 1.05 }}
+            className="inline-block bg-linear-to-r from-primary to-purple-600 bg-clip-text text-transparent"
+          >
+            E-Shop
+          </motion.span>
         </Link>
         <div className="flex items-center gap-3">
           {isAuthenticated && user && (
-            <div className="flex items-center gap-2 text-sm">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center gap-2 text-sm"
+            >
               <User className="h-4 w-4" />
               <span className="hidden sm:inline">{user.username}</span>
-            </div>
+            </motion.div>
           )}
-          <Button asChild variant="outline" size="sm">
-            <Link href="/favorites">My Favorites</Link>
-          </Button>
-          <Button asChild size="sm">
-            <Link href="/add">Add Product</Link>
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleThemeToggle}
-            aria-label="Toggle theme"
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/favorites">My Favorites</Link>
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button asChild size="sm">
+              <Link href="/add">Add Product</Link>
+            </Button>
+          </motion.div>
+          <motion.div
+            whileHover={{ rotate: 180 }}
+            transition={{ duration: 0.3 }}
           >
-            {theme === "dark" ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
-          </Button>
-          {isAuthenticated ? (
             <Button
               variant="ghost"
               size="icon"
-              onClick={handleLogout}
-              aria-label="Logout"
+              onClick={handleThemeToggle}
+              aria-label="Toggle theme"
             >
-              <LogOut className="h-5 w-5" />
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
             </Button>
+          </motion.div>
+          {isAuthenticated ? (
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                aria-label="Logout"
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </motion.div>
           ) : (
-            <Button asChild variant="outline" size="sm">
-              <Link href="/login">Login</Link>
-            </Button>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/login">Login</Link>
+              </Button>
+            </motion.div>
           )}
         </div>
       </nav>
-    </header>
+    </motion.header>
   );
 }

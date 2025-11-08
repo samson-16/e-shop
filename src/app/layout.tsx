@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/redux/providers";
 import { Toaster } from "react-hot-toast";
-import { Header } from "@/components/layout";
+import { Header, FloatingActionButton } from "@/components/layout";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,6 +23,7 @@ export default function RootLayout({
         <Providers>
           <Header />
           <div className="container mx-auto">{children}</div>
+          <FloatingActionButton />
           <Toaster
             position="top-right"
             toastOptions={{
@@ -30,6 +31,10 @@ export default function RootLayout({
               style: {
                 background: "#363636",
                 color: "#fff",
+                borderRadius: "12px",
+                padding: "16px",
+                fontSize: "14px",
+                boxShadow: "0 10px 40px rgba(0, 0, 0, 0.3)",
               },
               success: {
                 duration: 3000,
@@ -37,12 +42,20 @@ export default function RootLayout({
                   primary: "#4ade80",
                   secondary: "#fff",
                 },
+                style: {
+                  background:
+                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                },
               },
               error: {
                 duration: 4000,
                 iconTheme: {
                   primary: "#ef4444",
                   secondary: "#fff",
+                },
+                style: {
+                  background:
+                    "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
                 },
               },
             }}

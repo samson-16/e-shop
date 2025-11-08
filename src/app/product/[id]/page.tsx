@@ -15,6 +15,7 @@ import { deleteProduct } from "@/redux/features/productSlice";
 import { ArrowLeft, Heart, Star } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
+import { motion } from "framer-motion";
 
 interface ApiResponse {
   products: Product[];
@@ -150,19 +151,33 @@ export default function ProductDetailsPage() {
       {/* Product Details Section */}
       <div className="container mx-auto px-8 py-6 max-w-7xl">
         {/* Go Back Button */}
-        <Button
-          variant="ghost"
-          onClick={() => router.back()}
-          className="gap-2 mb-8 px-0 hover:bg-transparent"
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
         >
-          <ArrowLeft className="h-4 w-4" />
-          Go Back
-        </Button>
+          <Button
+            variant="ghost"
+            onClick={() => router.back()}
+            className="gap-2 mb-8 px-0 hover:bg-transparent"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Go Back
+          </Button>
+        </motion.div>
 
         <div className="flex flex-col lg:flex-row gap-12 mb-20">
           {/* Left: Image */}
-          <div className="shrink-0">
-            <div className="relative w-full lg:w-[480px] h-[480px] bg-muted/20 rounded-lg overflow-hidden flex items-center justify-center">
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="shrink-0"
+          >
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              className="relative w-full lg:w-[480px] h-[480px] bg-muted/20 rounded-lg overflow-hidden flex items-center justify-center"
+            >
               <Image
                 src={selectedImage}
                 alt={product.title}
@@ -170,18 +185,33 @@ export default function ProductDetailsPage() {
                 className="object-contain p-12"
                 priority
               />
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Right: Product Info */}
-          <div className="flex-1 max-w-2xl">
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="flex-1 max-w-2xl"
+          >
             <div className="space-y-3">
-              <p className="text-xs text-muted-foreground">
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="text-xs text-muted-foreground"
+              >
                 {product.category}
-              </p>
-              <h1 className="text-4xl font-bold leading-tight">
+              </motion.p>
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-4xl font-bold leading-tight"
+              >
                 {product.title}
-              </h1>
+              </motion.h1>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-3xl font-bold">${product.price}</span>
                 <div className="flex items-center gap-1 text-yellow-500">
@@ -224,24 +254,26 @@ export default function ProductDetailsPage() {
             </div>
 
             {/* Add to Favorites Button */}
-            <Button
-              variant="outline"
-              className="w-full gap-2 h-11 mt-6"
-              onClick={handleToggleCurrentFavorite}
-            >
-              <Heart
-                className={`h-4 w-4 ${
-                  isFavorite(product.id) ? "fill-current text-red-500" : ""
-                }`}
-              />
-              Add to Favorites
-            </Button>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                variant="outline"
+                className="w-full gap-2 h-11 mt-6"
+                onClick={handleToggleCurrentFavorite}
+              >
+                <Heart
+                  className={`h-4 w-4 ${
+                    isFavorite(product.id) ? "fill-current text-red-500" : ""
+                  }`}
+                />
+                Add to Favorites
+              </Button>
+            </motion.div>
 
             {/* Login Message */}
             {/* <div className="bg-muted/40 p-4 rounded-md text-center text-sm text-muted-foreground mt-4">
               Please login to add items to cart or favorites
             </div> */}
-          </div>
+          </motion.div>
         </div>
 
         {/* Related Products Section */}

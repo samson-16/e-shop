@@ -1,12 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import {
-  fetchProducts,
-  resetProducts,
-  deleteProduct,
-} from "@/redux/features/productSlice";
+import { fetchProducts, deleteProduct } from "@/redux/features/productSlice";
 import {
   ProductGrid,
   ProductSkeletonGrid,
@@ -14,37 +10,49 @@ import {
   CategoryFilter,
 } from "@/components/products";
 import { PageHeader } from "@/components/layout";
-import { useFavorites, useInfiniteScroll } from "@/hooks";
+import { FadeIn, ScaleIn } from "@/components/animations";
+import { useFavorites } from "@/hooks";
 import { PAGINATION, TOAST_MESSAGES } from "@/constants";
 import toast from "react-hot-toast";
 
 export default function HomePage() {
   const dispatch = useAppDispatch();
-  const { list, status, hasMore, isSearch, isFiltered } = useAppSelector(
-    (state) => state.products
-  );
+  const { list, status, hasMore } = useAppSelector((state) => state.products);
   const { isFavorite, handleToggleFavorite } = useFavorites();
 
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("");
   const [skip, setSkip] = useState(0);
 
-  // Debounced search and fetch products
-  useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      if (query !== "" || category !== "" || (query === "" && isSearch)) {
-        setSkip(0);
-        dispatch(resetProducts());
-      }
-      dispatch(fetchProducts({ query, category, skip }));
-    }, 500);
+  const observer = useRef<IntersectionObserver | null>(null);
+  const prevQueryRef = useRef(query);
+  const prevCategoryRef = useRef(category);
 
-    return () => clearTimeout(debounceTimer);
-  }, [query, category, skip, dispatch, isSearch]);
+  // Fetch products with debounce for search
+  useEffect(() => {
+    const isFilterChange =
+      prevQueryRef.current !== query || prevCategoryRef.current !== category;
+
+    if (isFilterChange) {
+      prevQueryRef.current = query;
+      prevCategoryRef.current = category;
+      setSkip(0);
+    }
+
+    const timer = setTimeout(
+      () => {
+        console.log("Fetching:", { query, category, skip });
+        dispatch(fetchProducts({ query, category, skip }));
+      },
+      isFilterChange ? 500 : 0
+    );
+
+    return () => clearTimeout(timer);
+  }, [query, category, skip, dispatch]);
 
   const handleCategoryChange = (newCategory: string) => {
     setCategory(newCategory);
-    setQuery(""); // Clear search when filtering by category
+    setQuery("");
   };
 
   const handleDelete = async (productId: number) => {
@@ -60,44 +68,70 @@ export default function HomePage() {
     }
   };
 
-  const lastProductElementRef = useInfiniteScroll({
-    isLoading: status === "loading",
-    hasMore: hasMore && !query && !isFiltered,
-    onLoadMore: () => setSkip((prev) => prev + PAGINATION.PRODUCTS_PER_PAGE),
-  });
+  // Intersection Observer for infinite scroll
+  const lastProductRef = useCallback(
+    (node: HTMLDivElement) => {
+      if (status === "loading") return;
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && hasMore && !query) {
+            setSkip((prev) => prev + PAGINATION.PRODUCTS_PER_PAGE);
+          }
+        },
+        { rootMargin: "200px" }
+      );
+
+      if (node) observer.current.observe(node);
+    },
+    [status, hasMore, query, skip]
+  );
 
   return (
     <main className="p-6">
-      <PageHeader title="Products" />
-      <SearchBar value={query} onChange={setQuery} />
-      <CategoryFilter
-        selectedCategory={category}
-        onCategoryChange={handleCategoryChange}
-      />
+      <FadeIn>
+        <PageHeader title="Products" />
+      </FadeIn>
+      <FadeIn delay={0.1}>
+        <SearchBar value={query} onChange={setQuery} />
+      </FadeIn>
+      <FadeIn delay={0.2}>
+        <CategoryFilter
+          selectedCategory={category}
+          onCategoryChange={handleCategoryChange}
+        />
+      </FadeIn>
 
       {status === "loading" && list.length === 0 ? (
         <ProductSkeletonGrid count={PAGINATION.PRODUCTS_PER_PAGE} />
       ) : list.length === 0 ? (
-        <div className="text-center py-10 text-muted-foreground">
-          <p>No products found.</p>
-        </div>
+        <ScaleIn>
+          <div className="text-center py-10 text-muted-foreground">
+            <p>No products found.</p>
+          </div>
+        </ScaleIn>
       ) : (
         <ProductGrid
           products={list}
           onToggleFavorite={handleToggleFavorite}
           isFavorite={isFavorite}
           onDelete={handleDelete}
-          lastProductRef={lastProductElementRef}
+          lastProductRef={lastProductRef}
         />
       )}
 
       {status === "loading" && list.length > 0 && (
-        <p className="text-center mt-10">Loading more...</p>
+        <FadeIn>
+          <p className="text-center mt-10">Loading more...</p>
+        </FadeIn>
       )}
       {!hasMore && list.length > 0 && (
-        <p className="text-center mt-10 text-muted-foreground">
-          You've reached the end.
-        </p>
+        <FadeIn>
+          <p className="text-center mt-10 text-muted-foreground">
+            You've reached the end. (Total: {list.length} products)
+          </p>
+        </FadeIn>
       )}
     </main>
   );
